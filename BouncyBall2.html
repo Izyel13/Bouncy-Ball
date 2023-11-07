@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>
+Carlos Esquilin, BouncyBall2
+</title>
+    <style>
+	body{text-align:center;font-size:2em}
+		
+        #error-container {
+            border: 1px solid red;
+            color: red;
+            padding: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<canvas id="myCanvas"></canvas>
+<body>
+    <div id="error-container"></div>
+
+<script>
+
+/*
+This script will find errors in your code when it executes and print them to the "error-container" div, so that you can troubleshoot your code more goodly
+*/
+
+        window.onerror = function (message, source, lineno, colno, error) {
+            var errorContainer = document.getElementById('error-container');
+
+            // Format the error details
+            var errorDetails = "Message: " + message + "\nSource: " + source + "\nLine Number: " + lineno;
+            
+            if(colno) {
+                errorDetails += "\nColumn Number: " + colno;
+            }
+            
+            if(error) {
+                errorDetails += "\nError: " + error;
+            }
+
+            // Make the error container visible and set the text
+            errorContainer.style.display = 'block';
+            errorContainer.textContent = errorDetails;
+
+            // Prevent the firing of the default event handler
+            return true;
+        };
+       
+</script>
+	
+
+<script>
+
+
+var canvas = document.getElementById("myCanvas");
+var ctx = canvas.getContext("2d");
+canvas.height = window.innerHeight -25;
+canvas.width = window.innerWidth -25;
+canvas.style = "border:1px solid #000000;";
+
+const gravity = 0.33;
+const friction = 0.9975;
+const bounce = 0.875;
+const buttonPower = canvas.height / 40;
+let colorFill1='rgb(255,255,255)';
+let colorFill2='rgb(0,0,0)';
+
+class Ball{
+    constructor(xPos,yPos,radius){
+        this.xPos = xPos;
+        this.yPos = yPos;
+        this.radius = radius;
+        this.xVelocity = 0;
+        this.yVelocity = 0;
+        this.color = 'rgb(0,0,0)';
+    }
+    move(){
+        if((this.xPos + this.xVelocity < canvas.width - this.radius)&&(this.xPos + this.xVelocity > 0 + this.radius)){
+            this.xPos += this.xVelocity;
+        }else{this.xVelocity = -this.xVelocity}
+
+        if((this.yPos + this.yVelocity < canvas.height - this.radius)&&(this.yPos + this.yVelocity > 0 + this.radius)){
+            this.yPos += this.yVelocity;
+        }else{this.yVelocity = -this.yVelocity * bounce}
+    }
+    draw(){
+        ctx.beginPath();
+        ctx.arc(this.xPos,this.yPos,this.radius,0,2*Math.PI);
+        ctx.stroke();
+        ctx.fill();
+    }
+}
+
+let ball1 = new Ball(canvas.width/4,canvas.height/4,canvas.height/20);
+let ball2 = new Ball(canvas.width*.75,canvas.height/4,canvas.height/20)
+
+updateScreen();
+
+function clearScreen(){
+    ctx.fillStyle=colorFill1;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle=colorFill2;
+}
+
+function updateScreen(){
+    clearScreen();
+    detectCollision(ball1,ball2);
+    ball1.move();
+    ball2.move();
+
+    ball1.draw();
+    ball2.draw();
+
+    ball1.yVelocity+=gravity;
+    ball1.xVelocity*=friction;
+    ball2.yVelocity+=gravity;
+    ball2.xVelocity*=friction;
+
+    window.requestAnimationFrame(updateScreen);
+}
+
+window.addEventListener('keydown',function(event){
+    if(event.code=='KeyA'){ball1.xVelocity = -buttonPower;}
+    if(event.code=='KeyD'){ball1.xVelocity = buttonPower;}
+    if(event.code=='KeyS'){ball1.yVelocity = buttonPower;}
+    if(event.code=='KeyW'){ball1.yVelocity = -buttonPower;}
+
+    if(event.code=='ArrowLeft'){ball2.xVelocity = -buttonPower;}
+    if(event.code=='ArrowRight'){ball2.xVelocity = buttonPower;}
+    if(event.code=='ArrowDown'){ball2.yVelocity = buttonPower;}
+    if(event.code=='ArrowUp'){ball2.yVelocity = -buttonPower;}
+  
+})  
+
+function detectCollision(obj1,obj2){
+    let dx = obj1.xPos - obj2.xPos;
+    let dy = obj1.yPos - obj2.yPos;
+    let distance = Math.sqrt(dx**2 + dy**2);
+    let sumOfRadii = obj1.radius + obj2.radius;
+
+    if(distance <= sumOfRadii){
+        let angle = Math.asin(dy/distance);
+
+
+        obj1.xVelocity = -obj1.XVelocity;
+        obj1.yVelocity = -obj1.yVelocity;
+        obj2.xVelocity = -obj2.xVelocity;
+        obj2.yVelocity = -obj2.yVelocity
+
+    }
+}
+
+</script>
+
+</body>
+</html>
